@@ -1,6 +1,7 @@
-/* Include the HCPCA9685 library */
 #include "HCPCA9685.h"
-//#include "ServoEasing"
+#include <Console.h>
+
+String name;
 
 #define  I2CAdd 0x40
 HCPCA9685 HCPCA9685(I2CAdd);
@@ -36,13 +37,31 @@ int iEnd = 100;
 void setup() {
   HCPCA9685.Init(SERVO_MODE);
   HCPCA9685.Sleep(false);
-  delay(5000);
-  from_extended_to_park(1);
-  //park();
+  // delay(5000);
+  // from_extended_to_park(1);
+  // park();
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN,HIGH);
+  Serial.begin(9600);
 }
 
 void loop() {
+  
+  digitalWrite(LED_BUILTIN,LOW);
+  if (Serial.available() > 0) {
+    digitalWrite(LED_BUILTIN,HIGH);
+    char c = Serial.read(); // read the next char received
+    Serial.print(c);
+    if (c == '\n') {
+      //Serial.print(" [enter] ");
+      delay(100);
+    }
+  } else {
+    delay(10);
+  }
+}
 
+void routine_1(){
     delay(500);
     open_claw();
     HCPCA9685.Servo(wrist, wrist_counterclock);
@@ -56,7 +75,7 @@ void loop() {
     delay(500);   
     from_extended_to_park(20);
     wrist_flick(500);
-}
+  }
 
 void from_park_to_extended(int milisecs){
   for(int step = iStart; step < 101; step++)
@@ -122,7 +141,6 @@ void park_base(){
   HCPCA9685.Servo(base_left, base_left_park);
   HCPCA9685.Servo(base_right, base_right_park);
 }
-
 
 void park(){
   park_base();
